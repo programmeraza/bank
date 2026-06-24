@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ShieldAlert, Settings, FolderTree, X } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldAlert, Settings, FolderTree, X, Landmark, TrendingUp, ShieldCheck, Cpu } from 'lucide-react';
 import { usePermission } from '@/features/auth/hooks/usePermission';
 import { Permission } from '@/features/auth/types/rbac';
 
@@ -49,11 +49,51 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
       permission: 'settings:write'
     },
     // Внутри Sidebar.tsx в массив navigation добавьте пункт:
-    { name: 'База клиентов', 
-      href: '/clients', 
-      icon: Users, 
-      permission: 'users:read' 
+    {
+      name: 'База клиентов',
+      href: '/clients',
+      icon: Users,
+      permission: 'users:read'
     },
+    // Добавьте этот пункт в массив navigation внутри Sidebar.tsx:
+    {
+      name: 'Кредитные заявки',
+      href: '/applications',
+      icon: FolderTree
+    },
+    // Добавьте этот пункт в массив navigation внутри Sidebar.tsx:
+    {
+      name: 'Реестр договоров',
+      href: '/contracts',
+      icon: Landmark
+    },
+    // Добавьте этот пункт в массив navigation внутри Sidebar.tsx:
+    {
+      name: 'Кредитный портфель',
+      href: '/portfolio',
+      icon: TrendingUp
+    },
+    // Добавьте этот пункт в массив navigation внутри Sidebar.tsx:
+    {
+      name: 'Операционный аудит',
+      href: '/operations',
+      icon: ShieldCheck
+    },
+    {
+      name: 'Аналитика и Отчеты',
+      href: '/reports',
+      icon: TrendingUp
+    },
+    {
+      name: 'Шлюзы интеграций',
+      href: '/integrations',
+      icon: Cpu
+    },
+    {
+      name: 'Комплаенс-контроль', 
+      href: '/compliance',
+      icon: ShieldCheck
+    }
   ];
 
   return (
@@ -88,8 +128,8 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
               href={item.href}
               onClick={onCloseMobile}
               className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                 }`}
             >
               <item.icon
