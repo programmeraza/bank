@@ -25,28 +25,34 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
 
   // 2. Явно указываем тип NavigationItem[] для массива меню
   const navigation: NavigationItem[] = [
-    { 
-      name: 'Панель управления', 
-      href: '/dashboard', 
-      icon: LayoutDashboard 
+    {
+      name: 'Панель управления',
+      href: '/dashboard',
+      icon: LayoutDashboard
     },
-    { 
-      name: 'Пользователи', 
-      href: '/admin/users', 
-      icon: Users, 
+    {
+      name: 'Пользователи',
+      href: '/admin/users',
+      icon: Users,
       permission: 'users:read' // Теперь TypeScript понимает, что это Permission
     },
-    { 
-      name: 'Журнал аудита', 
-      href: '/admin/audit', 
-      icon: ShieldAlert, 
-      permission: 'audit:read' 
+    {
+      name: 'Журнал аудита',
+      href: '/admin/audit',
+      icon: ShieldAlert,
+      permission: 'audit:read'
     },
-    { 
-      name: 'Настройки', 
-      href: '/settings', 
-      icon: Settings, 
-      permission: 'settings:write' 
+    {
+      name: 'Настройки',
+      href: '/settings',
+      icon: Settings,
+      permission: 'settings:write'
+    },
+    // Внутри Sidebar.tsx в массив navigation добавьте пункт:
+    { name: 'База клиентов', 
+      href: '/clients', 
+      icon: Users, 
+      permission: 'users:read' 
     },
   ];
 
@@ -59,7 +65,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
           <span className="text-lg font-bold text-white tracking-wider">PLATFORM PRO</span>
         </div>
         {onCloseMobile && (
-          <button 
+          <button
             onClick={onCloseMobile}
             className="rounded p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white md:hidden"
             aria-label="Закрыть меню"
@@ -81,16 +87,14 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
               key={item.name}
               href={item.href}
               onClick={onCloseMobile}
-              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
+              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
                   ? 'bg-zinc-800 text-white'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
-              }`}
+                }`}
             >
               <item.icon
-                className={`h-5 w-5 shrink-0 ${
-                  isActive ? 'text-indigo-400' : 'text-zinc-400 group-hover:text-white'
-                }`}
+                className={`h-5 w-5 shrink-0 ${isActive ? 'text-indigo-400' : 'text-zinc-400 group-hover:text-white'
+                  }`}
               />
               {item.name}
             </Link>
