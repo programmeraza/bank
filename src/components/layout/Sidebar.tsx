@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ShieldAlert, Settings, FolderTree, X, Landmark, TrendingUp, ShieldCheck, Cpu } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldAlert, Settings, FolderTree, X, Landmark, TrendingUp, ShieldCheck, Cpu, Scale, AlertCircle } from 'lucide-react';
 import { usePermission } from '@/features/auth/hooks/usePermission';
 import { Permission } from '@/features/auth/types/rbac';
 
@@ -90,9 +90,43 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
       icon: Cpu
     },
     {
-      name: 'Комплаенс-контроль', 
+      name: 'Комплаенс-контроль',
       href: '/compliance',
       icon: ShieldCheck
+    },
+    // Внутри Sidebar.tsx в массив navigation добавьте пункт:
+    {
+      name: 'Кабинет Maker/Checker',
+      href: '/underwriting/APP-1025',
+      icon: ShieldCheck
+    },
+    // Внутри Sidebar.tsx в массив navigation добавьте пункты:
+    {
+      name: 'Мониторинг резервов',
+      href: '/reserves',
+      icon: Scale
+    },
+    {
+      name: 'Реестр списаний',
+      href: '/write-off',
+      icon: AlertCircle
+    },
+    // Внутри Sidebar.tsx в массив navigation добавьте пункт:
+    {
+      name: 'Кабинет Руководителя',
+      href: '/reports/executive',
+      icon: TrendingUp
+
+    },
+    {
+      name: 'Бухгалтерские проводки',
+      href: '/reports/accounting',
+      icon: Landmark
+    },
+    {
+      name: 'Отчетность взыскания',
+      href: '/reports/collections',
+      icon: ShieldAlert
     }
   ];
 

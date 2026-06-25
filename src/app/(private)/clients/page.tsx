@@ -1,15 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Filter, ArrowUpDown, ChevronLeft, ChevronRight, UserCheck, ShieldAlert, Ban } from 'lucide-react';
+import { Search, Plus, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Client, ClientStatus, KYCStatus, RiskLevel } from '@/features/clients/types';
+import { Client, ClientStatus, KYCStatus } from '@/features/clients/types';
 import { useDebounce } from '@/hooks/useDebounce';
+
+// Импорты UI Kit (сохраняя структуру)
+import PageTransition from '@/shared/ui/PageTransition';
+import Button from '@/shared/ui/Button';
+import Badge from '@/shared/ui/Badge';
 import ClientsTableSkeleton from '@/features/clients/components/ClientsTableSkeleton';
 import ClientsErrorState from '@/features/clients/components/ClientsErrorState';
 import toast from 'react-hot-toast';
 
-// Демонстрационный список клиентов (mock data)
 const MOCK_CLIENTS: Client[] = [
   {
     id: 'CL-0891',
@@ -67,35 +71,12 @@ const MOCK_CLIENTS: Client[] = [
     income: 25000000,
     jobTitle: 'Директор филиала',
     citizenship: 'Российская Федерация'
-  },
-  {
-    id: 'CL-0894',
-    name: 'Юсупова Феруза Анваровна',
-    phone: '+998 99 333 44 55',
-    email: 'feruza.y@gmail.com',
-    pinfl: '40105943910492',
-    passport: 'AB5928103',
-    birthDate: '22.01.2001',
-    branchId: 'b3',
-    branchName: 'Филиал Юг',
-    status: 'Suspended',
-    kycStatus: 'Failed',
-    riskLevel: 'High',
-    managerName: 'Дмитрий Иванов',
-    createdAt: '18.01.2025',
-    income: 4500000,
-    jobTitle: 'Администратор',
-    citizenship: 'Узбекистан'
   }
 ];
 
 export default function ClientsListPage() {
   const router = useRouter();
 
-  // Состояния фильтрации и поиска
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterBranch, setFilterBranch] = useState<string>('');
@@ -104,10 +85,12 @@ export default function ClientsListPage() {
   const [sortBy, setSortBy] = useState<'name' | 'createdAt'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Дебаунс для поисковой строки (300 мс задержки перед фильтрацией)
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const debouncedSearch = useDebounce(search, 300);
 
-  // Имитация первичной загрузки данных списка
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -120,26 +103,21 @@ export default function ClientsListPage() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      toast.success('Данные списка клиентов успешно обновлены');
+      toast.success('Данные успешно обновлены');
     }, 1000);
   };
 
-  // Имитация возникновения ошибок по кодам (для демонстрации комплаенс-офицеру)
-  const handleTriggerError = (code: 403 | 500 | 'timeout') => {
+  const handleTriggerError = (code: 403 | 500) => {
     setIsError(true);
     if (code === 403) {
-      setErrorMessage('Код ошибки: 403 (Forbidden). Доступ к базе клиентов ограничен политикой безопасности вашего аккаунта.');
-      toast.error('Доступ запрещен (403)');
-    } else if (code === 'timeout') {
-      setErrorMessage('Превышено время ожидания ответа от сервера (Gateway Timeout).');
-      toast.error('Превышен лимит ожидания сети');
+      setErrorMessage('Код ошибки: 403 (Forbidden). Доступ ограничен.');
+      toast.error('Доступ ограничен');
     } else {
-      setErrorMessage('Внутренняя ошибка сервера (500 Internal Server Error). Наша техническая служба уже уведомлена.');
-      toast.error('Ошибка сервера (500)');
+      setErrorMessage('Ошибка сервера (500 Internal Server Error).');
+      toast.error('Ошибка сервера');
     }
   };
 
-  // Логика сортировки и фильтрации данных
   const filteredClients = MOCK_CLIENTS.filter((client) => {
     const matchesSearch =
       client.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
@@ -169,239 +147,124 @@ export default function ClientsListPage() {
     }
   };
 
-  // Бейджи статусов клиента
   const getStatusBadge = (status: ClientStatus) => {
-    const styles: Record<ClientStatus, string> = {
-      Active: 'bg-green-50 text-green-700 ring-green-600/20',
-      Pending: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-      Suspended: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-      Blocked: 'bg-red-50 text-red-700 ring-red-600/20',
-    };
-    const labels: Record<ClientStatus, string> = {
-      Active: 'Активен',
-      Pending: 'На проверке',
-      Suspended: 'Приостановлен',
-      Blocked: 'Блокирован',
-    };
-    return (
-      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
+    switch (status) {
+      case 'Active': return <Badge label="Активен" variant="success" />;
+      case 'Pending': return <Badge label="На проверке" variant="info" />;
+      case 'Suspended': return <Badge label="Приостановлен" variant="warning" />;
+      case 'Blocked': return <Badge label="Блокирован" variant="error" />;
+    }
   };
 
-  // Бейджи KYC статусов
   const getKYCBadge = (status: KYCStatus) => {
-    const styles: Record<KYCStatus, string> = {
-      Passed: 'text-green-700 bg-green-50',
-      Failed: 'text-red-700 bg-red-50',
-      Pending: 'text-blue-700 bg-blue-50',
-      Required: 'text-amber-700 bg-amber-50',
-    };
-    return (
-      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}>
-        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-        {status}
-      </span>
-    );
+    switch (status) {
+      case 'Passed': return <Badge label="KYC Passed" variant="success" />;
+      case 'Failed': return <Badge label="KYC Failed" variant="error" />;
+      case 'Pending': return <Badge label="KYC Pending" variant="info" />;
+      case 'Required': return <Badge label="KYC Required" variant="warning" />;
+    }
   };
 
-  if (isLoading) {
-    return <ClientsTableSkeleton />;
-  }
-
-  if (isError) {
-    return <ClientsErrorState message={errorMessage} onRetry={handleRetry} />;
-  }
+  if (isLoading) return <ClientsTableSkeleton />;
+  if (isError) return <ClientsErrorState message={errorMessage} onRetry={handleRetry} />;
 
   return (
-    <div className="space-y-6">
-      {/* Панель симуляции UX состояний (для тестирования) */}
-      <div className="flex flex-wrap gap-2 justify-end rounded-lg bg-zinc-100 p-1.5 w-fit ml-auto text-[10px]">
-        <button
-          onClick={() => { setIsLoading(true); setTimeout(() => setIsLoading(false), 800); }}
-          className="px-2.5 py-1 rounded bg-white font-medium text-zinc-700 shadow-sm hover:bg-zinc-50"
-        >
-          Скелетон загрузки
-        </button>
-        <button
-          onClick={() => handleTriggerError(403)}
-          className="px-2.5 py-1 rounded text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200"
-        >
-          Симулировать 403
-        </button>
-        <button
-          onClick={() => handleTriggerError(500)}
-          className="px-2.5 py-1 rounded text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200"
-        >
-          Симулировать 500
-        </button>
-        <button
-          onClick={() => handleTriggerError('timeout')}
-          className="px-2.5 py-1 rounded text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200"
-        >
-          Имитировать таймаут
-        </button>
-      </div>
-      
-      {/* Шапка списка */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-zinc-950">База клиентов</h2>
-          <p className="text-xs text-zinc-500">Поиск, KYC/AML верификация и управление юридическими согласиями клиентов.</p>
-        </div>
-        <button
-          onClick={() => router.push('/clients/create')}
-          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
-        >
-          <Plus className="h-4 w-4" /> Создать клиента
-        </button>
-      </div>
-
-      {/* Фильтры */}
-      <div className="grid grid-cols-1 gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-4">
-        {/* Поисковая строка */}
-        <div className="relative col-span-1 sm:col-span-1">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
-            <Search className="h-4 w-4" />
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ФИО, Телефон, ПИНФЛ или ID..."
-            className="w-full rounded border border-zinc-300 pl-10 pr-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none"
-          />
+    <PageTransition>
+      <div className="space-y-6">
+        {/* Тест-панель для комплаенса */}
+        <div className="flex justify-end gap-2 rounded-lg bg-zinc-100 p-1.5 w-fit ml-auto text-[10px]">
+          <button onClick={() => { setIsLoading(true); setTimeout(() => setIsLoading(false), 800); }} className="px-2 py-0.5 rounded bg-white font-medium text-zinc-700 shadow-sm">Скелетон</button>
+          <button onClick={() => handleTriggerError(403)} className="px-2 py-0.5 rounded text-zinc-600">Тест 403</button>
+          <button onClick={() => handleTriggerError(500)} className="px-2 py-0.5 rounded text-zinc-600">Тест 500</button>
         </div>
 
-        {/* Статус */}
-        <div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full rounded border border-zinc-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none bg-white"
-          >
+        {/* Шапка списка */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-zinc-950">База клиентов</h2>
+            <p className="text-xs text-zinc-500 font-medium">Управление карточками заемщиков, скоринг и верификация согласий.</p>
+          </div>
+          <Button variant="primary" onClick={() => router.push('/clients/create')}>
+            <Plus className="h-4 w-4 mr-1.5" /> Создать клиента
+          </Button>
+        </div>
+
+        {/* Исходная сетка фильтров из Спринта 2 (Без обертки в Card) */}
+        <div className="grid grid-cols-1 gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm sm:grid-cols-4">
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">
+              <Search className="h-4 w-4" />
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ФИО, Телефон, ПИНФЛ..."
+              className="w-full rounded border border-zinc-300 pl-10 pr-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none bg-white"
+            />
+          </div>
+
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded border border-zinc-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none bg-white">
             <option value="">Все статусы</option>
             <option value="Active">Активен</option>
             <option value="Pending">На проверке</option>
-            <option value="Suspended">Приостановлен</option>
             <option value="Blocked">Блокирован</option>
           </select>
-        </div>
 
-        {/* Филиал */}
-        <div>
-          <select
-            value={filterBranch}
-            onChange={(e) => setFilterBranch(e.target.value)}
-            className="w-full rounded border border-zinc-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none bg-white"
-          >
+          <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)} className="rounded border border-zinc-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none bg-white">
             <option value="">Все филиалы</option>
             <option value="b1">Центральный офис</option>
             <option value="b2">Филиал Север</option>
-            <option value="b3">Филиал Юг</option>
           </select>
-        </div>
 
-        {/* Риск-уровень */}
-        <div>
-          <select
-            value={filterRisk}
-            onChange={(e) => setFilterRisk(e.target.value)}
-            className="w-full rounded border border-zinc-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none bg-white"
-          >
-            <option value="">Все риски</option>
+          <select value={filterRisk} onChange={(e) => setFilterRisk(e.target.value)} className="rounded border border-zinc-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:outline-none bg-white">
+            <option value="">Все уровни риска</option>
             <option value="Low">Low Risk</option>
             <option value="Medium">Medium Risk</option>
             <option value="High">High Risk</option>
           </select>
         </div>
-      </div>
 
-      {/* Таблица */}
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-zinc-200 text-left text-sm">
-          <thead className="bg-zinc-50">
-            <tr>
-              <th className="px-6 py-3 font-semibold text-zinc-700">ID Клиента</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700 cursor-pointer select-none" onClick={() => handleSort('name')}>
-                <div className="flex items-center gap-1">
-                  ФИО / Контакты <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
-                </div>
-              </th>
-              <th className="px-6 py-3 font-semibold text-zinc-700">Документы (ПИНФЛ / Паспорт)</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700">Филиал / Менеджер</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700">Статус</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700">KYC</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700">AML Риск</th>
-              <th className="px-6 py-3 font-semibold text-zinc-700 cursor-pointer select-none" onClick={() => handleSort('createdAt')}>
-                <div className="flex items-center gap-1">
-                  Дата регистрации <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200">
-            {filteredClients.length > 0 ? (
-              filteredClients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-zinc-50/50 cursor-pointer transition-colors"
-                  onClick={() => router.push(`/clients/${client.id}`)}
-                >
-                  <td className="px-6 py-4 font-mono text-xs font-semibold text-zinc-600">{client.id}</td>
+        {/* Таблица */}
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
+          <table className="min-w-full divide-y divide-zinc-200 text-left text-sm">
+            <thead className="bg-zinc-50 font-semibold text-zinc-700 text-xs">
+              <tr>
+                <th className="px-6 py-3">ID</th>
+                <th className="px-6 py-3 cursor-pointer select-none" onClick={() => handleSort('name')}>
+                  <div className="flex items-center gap-1">ФИО / Контакты <ArrowUpDown className="h-3 w-3 text-zinc-400" /></div>
+                </th>
+                <th className="px-6 py-3">ПИНФЛ / Паспорт</th>
+                <th className="px-6 py-3">Филиал</th>
+                <th className="px-6 py-3">Статус</th>
+                <th className="px-6 py-3">KYC</th>
+                <th className="px-6 py-3 cursor-pointer select-none" onClick={() => handleSort('createdAt')}>
+                  <div className="flex items-center gap-1">Регистрация <ArrowUpDown className="h-3 w-3 text-zinc-400" /></div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 text-xs text-zinc-600">
+              {filteredClients.map((client) => (
+                <tr key={client.id} className="hover:bg-zinc-50/50 cursor-pointer transition-colors" onClick={() => router.push(`/clients/${client.id}`)}>
+                  <td className="px-6 py-4 font-mono text-zinc-500 font-semibold">{client.id}</td>
                   <td className="px-6 py-4">
-                    <div className="font-semibold text-zinc-950">{client.name}</div>
-                    <div className="text-xs text-zinc-500">{client.phone}</div>
+                    <div className="font-semibold text-zinc-900">{client.name}</div>
+                    <div className="text-zinc-500 text-[11px] mt-0.5">{client.phone}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-xs text-zinc-700 font-medium">ПИНФЛ: {client.pinfl}</div>
-                    <div className="text-xs text-zinc-500 font-mono">Паспорт: {client.passport}</div>
+                    <div className="font-medium text-zinc-700">ПИНФЛ: {client.pinfl}</div>
+                    <div className="text-zinc-500 font-mono text-[11px] mt-0.5">Паспорт: {client.passport}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-xs font-medium text-zinc-800">{client.branchName}</div>
-                    <div className="text-xs text-zinc-500">{client.managerName}</div>
-                  </td>
+                  <td className="px-6 py-4">{client.branchName}</td>
                   <td className="px-6 py-4">{getStatusBadge(client.status)}</td>
                   <td className="px-6 py-4">{getKYCBadge(client.kycStatus)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${client.riskLevel === 'High'
-                      ? 'bg-red-50 text-red-700'
-                      : client.riskLevel === 'Medium'
-                        ? 'bg-amber-50 text-amber-700'
-                        : 'bg-green-50 text-green-700'
-                      }`}>
-                      {client.riskLevel}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-xs text-zinc-500">{client.createdAt}</td>
+                  <td className="px-6 py-4 font-mono text-zinc-500">{client.createdAt}</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="px-6 py-12 text-center text-sm text-zinc-500">
-                  Совпадений в базе клиентов не найдено.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {/* Простая пагинация */}
-        <div className="flex items-center justify-between border-t border-zinc-200 px-6 py-4">
-          <span className="text-xs text-zinc-500">
-            Показано {filteredClients.length} из {MOCK_CLIENTS.length} записей
-          </span>
-          <div className="flex gap-2">
-            <button disabled className="inline-flex items-center justify-center rounded border p-1 text-zinc-400 disabled:opacity-50">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button disabled className="inline-flex items-center justify-center rounded border p-1 text-zinc-400 disabled:opacity-50">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

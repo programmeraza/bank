@@ -1,15 +1,25 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+* {
+  user-select: none;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --primary: #0F4C81;
+  --primary-hover: #0D3F6A;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --background: #F8FAFC;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+
+  --text-main: #111827;
+  --text-sub: #374151;
+  --text-muted: #4B5563;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +33,124 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+input::placeholder,
+select::placeholder,
+textarea::placeholder,
+option::placeholder {
+  color: var(--text-sub);
+  opacity: 1;
+}
+
+input, select, textarea {
+  color: var(--text-sub);
+}
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Плавный ховер для карточек */
+.card-hover-effect {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 76, 129, 0.06);
+}
+
+/* Анимированный скелетон */
+@keyframes skeletonPulse {
+
+  0%,
+  100% {
+    background-color: #E5E7EB;
+  }
+
+  50% {
+    background-color: #F3F4F6;
+  }
+}
+
+.skeleton-shimmer {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+
+.dark body {
+  background-color: #09090B !important;
+  color: #A1A1AA !important;
+}
+
+/* Перекрашиваем все белые фоны карточек, таблиц, сайдбара и хедера в темный цвет */
+.dark .bg-white,
+.dark .bg-zinc-50,
+.dark .bg-zinc-100 {
+  background-color: #18181B !important;
+}
+
+/* Перекрашиваем все границы и бордеры */
+.dark .border,
+.dark .border-zinc-200,
+.dark .border-zinc-300,
+.dark .border-zinc-150,
+.dark .border-zinc-100,
+.dark .divide-zinc-200> :not([hidden])~ :not([hidden]) {
+  border-color: #27272A !important;
+}
+
+/* Перекрашиваем тексты */
+.dark .text-zinc-950,
+.dark .text-zinc-900,
+.dark .font-bold {
+  color: #F4F4F5 !important;
+}
+
+.dark .text-zinc-800,
+.dark .text-zinc-700 {
+  color: #E4E4E7 !important;
+}
+
+.dark .text-zinc-600,
+.dark .text-zinc-500,
+.dark .text-zinc-400 {
+  color: #A1A1AA !important;
+}
+
+/* Корректируем инпуты, селекторы и текстовые области */
+.dark select,
+.dark input,
+.dark textarea {
+  background-color: #18181B !important;
+  border-color: #27272A !important;
+  color: #F4F4F5 !important;
+}
+
+.dark select option {
+  background-color: #18181B !important;
+  color: #F4F4F5 !important;
+}
+
+/* Печатные страницы */
+@media print {
+  .dark body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+  }
 }
